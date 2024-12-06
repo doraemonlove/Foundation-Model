@@ -8,8 +8,6 @@ import torch
 import torch.distributed as dist
 
 from exp.exp_forecast import Exp_Forecast
-from exp.exp_anomaly_detection import Exp_Anomaly_Detection
-from exp.exp_imputation import Exp_Imputation
 from utils.tools import HiddenPrints
 
 if __name__ == '__main__':
@@ -135,11 +133,7 @@ if __name__ == '__main__':
         print('init_process_group finished')
         torch.cuda.set_device(local_rank)
 
-    if args.task_name == 'imputation':
-        Exp = Exp_Imputation
-    elif args.task_name == 'anomaly_detection':
-        Exp = Exp_Anomaly_Detection
-    elif args.task_name == 'forecast':
+    if args.task_name == 'forecast':
         Exp = Exp_Forecast
     else:
         raise ValueError('task name not found')
@@ -175,8 +169,6 @@ if __name__ == '__main__':
                 print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
                 exp.finetune(setting)
 
-                # print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-                # exp.test(setting)
                 torch.cuda.empty_cache()
         else:
             ii = 0
