@@ -60,10 +60,10 @@ class Exp_Forecast(Exp_Basic):
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float()
                 if self.args.output_attention:
                     # output used to calculate loss misaligned patch_len compared to input
-                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                    outputs = self.model(batch_x)[0]
                 else:
                     # only use the forecast window to calculate loss
-                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                    outputs = self.model(batch_x)
 
                 if self.args.use_ims:
                     pred = outputs[:, -self.args.seq_len:, :]
@@ -133,9 +133,9 @@ class Exp_Forecast(Exp_Basic):
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
                 
                 if self.args.output_attention:
-                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                    outputs = self.model(batch_x)[0]
                 else:
-                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                    outputs = self.model(batch_x)
 
                 if self.args.use_ims:
                     # output used to calculate loss misaligned patch_len compared to input
@@ -231,16 +231,15 @@ class Exp_Forecast(Exp_Basic):
                             batch_x = torch.cat([batch_x[:, self.args.pred_len:, :], pred_y[-1]], dim=1)
                             tmp = batch_y_mark[:, j - 1:j, :]
                             batch_x_mark = torch.cat([batch_x_mark[:, 1:, :], tmp], dim=1)
-
+                        
                         if self.args.output_attention:
-                            outputs, attns = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                            outputs, attns = self.model(batch_x)
                         else:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                            outputs = self.model(batch_x)
 
                         f_dim = -1 if self.args.features == 'MS' else 0
                         pred_y.append(outputs[:, -self.args.pred_len:, :])
                     pred_y = torch.cat(pred_y, dim=1)
-
                     if dis != 0:
                         pred_y = pred_y[:, :-dis, :]
 
