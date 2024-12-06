@@ -1,0 +1,42 @@
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:16
+mse:4.661896, mae:1.756049, smape:143.306339, mape:601.162148, mase:5.045363
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:48
+mse:4.778731, mae:1.770571, smape:143.894243, mape:596.377659, mase:5.086217
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:96
+mse:4.268112, mae:1.668997, smape:142.104924, mape:545.016527, mase:4.792953
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:128
+mse:3.904385, mae:1.588908, smape:139.373100, mape:510.622168, mase:4.561226
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:256
+mse:3.274026, mae:1.440347, smape:132.886767, mape:445.508718, mase:4.132179
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:352
+mse:3.030366, mae:1.373985, smape:129.316938, mape:417.592049, mase:3.940033
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:480
+mse:2.886056, mae:1.334623, smape:127.191234, mape:401.538038, mase:3.825785
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:16
+mse:4.661896, mae:1.756049, smape:143.306339, mape:601.162148, mase:5.045363
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:48
+mse:4.778731, mae:1.770571, smape:143.894243, mape:596.377659, mase:5.086217
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:96
+mse:4.268112, mae:1.668997, smape:142.104924, mape:545.016527, mase:4.792953
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:128
+mse:3.904385, mae:1.588908, smape:139.373100, mape:510.622168, mase:4.561226
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:256
+mse:3.274026, mae:1.440347, smape:132.886767, mape:445.508718, mase:4.132179
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:352
+mse:3.030366, mae:1.373985, smape:129.316938, mape:417.592049, mase:3.940033
+
+forecast_electricity_sr_1_Timer_custom_ftM_sl480_ll464_pl16_dm1024_nh8_el8_dl1_df2048_fc3_ebtimeF_dtTrue_Exp output_len:480
+mse:2.886056, mae:1.334623, smape:127.191234, mape:401.538038, mase:3.825785
+

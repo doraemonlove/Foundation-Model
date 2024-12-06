@@ -1,0 +1,9 @@
+_target_: uni2ts.data.builder.ConcatDatasetBuilder
+_args_:
+  _target_: uni2ts.data.builder.simple.generate_eval_builders
+  dataset: ECL_finetune_eval
+  offset: 4000
+  eval_length: 1800
+  prediction_lengths: [1, 12, 48]
+  context_lengths: [512]
+  patch_sizes: [16]
