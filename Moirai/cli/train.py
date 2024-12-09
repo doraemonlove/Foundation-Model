@@ -23,7 +23,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils._pytree import tree_map
 from torch.utils.data import Dataset, DistributedSampler
-
+from hydra import initialize, compose
 from uni2ts.common import hydra_util  # noqa: hydra resolvers
 from uni2ts.data.loader import DataLoader
 
