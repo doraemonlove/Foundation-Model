@@ -51,7 +51,7 @@ train_dataloader:
   cycle: true
   num_batches_per_epoch: 100
   shuffle: true
-  num_workers: 11
+  num_workers: 1
   collate_fn:
     _target_: uni2ts.data.loader.PackCollate
     max_length: ${model.module_kwargs.max_seq_len}
@@ -70,7 +70,7 @@ val_dataloader:
   cycle: false
   num_batches_per_epoch: null
   shuffle: false
-  num_workers: 11
+  num_workers: 1
   collate_fn:
     _target_: uni2ts.data.loader.PackCollate
     max_length: ${model.module_kwargs.max_seq_len}
