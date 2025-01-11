@@ -1,0 +1,3 @@
+[submodule "Time-LLM"]
+	path = Time-LLM
+	url = git@github.com:KimMeen/Time-LLM.git

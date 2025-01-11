@@ -1,0 +1,7 @@
+_target_: uni2ts.eval_util.data.get_custom_eval_dataset
+dataset_name: heating_test_1
+offset: 500
+windows: 125
+distance: 12
+prediction_length: 512
+mode: null

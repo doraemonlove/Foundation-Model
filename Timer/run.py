@@ -15,18 +15,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Large Time Series Model')
 
     # basic config
-    parser.add_argument('--task_name', type=str, required=True, default='long_term_forecast',
+    parser.add_argument('--task_name', type=str, required=True, default='forecast',
                         help='task name, options:[forecast, imputation, anomaly_detection]')
-    parser.add_argument('--is_training', type=int, required=True, default=1, help='status')
+    parser.add_argument('--is_training', type=int, required=True, default=0, help='status')
     parser.add_argument('--model_id', type=str, required=True, default='test', help='model id')
     parser.add_argument('--model', type=str, required=True, default='Timer',
                         help='model name, options: [Timer TrmEncoder]')
     parser.add_argument('--seed', type=int, default=0, help='random seed')
 
     # data loader
-    parser.add_argument('--data', type=str, required=True, default='ETTm1', help='dataset type')
-    parser.add_argument('--root_path', type=str, default='./data/ETT/', help='root path of the data file')
-    parser.add_argument('--data_path', type=str, default='ETTh1.csv', help='data file')
+    parser.add_argument('--data', type=str, required=True, default='custom', help='dataset type')
+    parser.add_argument('--root_path', type=str, default='./dataset/electricity/', help='root path of the data file')
+    parser.add_argument('--data_path', type=str, default='electricity.csv', help='data file')
     parser.add_argument('--features', type=str, default='M',
                         help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
     parser.add_argument('--target', type=str, default='OT', help='target feature in S or MS task')
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('--devices', type=str, default='0,1,2,3', help='device ids of multile gpus')
 
     parser.add_argument('--stride', type=int, default=1, help='stride')
-    parser.add_argument('--ckpt_path', type=str, default='', help='ckpt file')
+    parser.add_argument('--ckpt_path', type=str, default='checkpoints/Timer_forecast_1.0.ckpt', help='ckpt file')
     parser.add_argument('--finetune_epochs', type=int, default=10, help='train epochs')
     parser.add_argument('--finetune_rate', type=float, default=0.1, help='finetune ratio')
     parser.add_argument('--local_rank', type=int, default=0, help='local_rank')

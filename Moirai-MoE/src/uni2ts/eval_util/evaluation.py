@@ -156,7 +156,7 @@ def evaluate_forecasts_raw(
             mask_invalid_label=mask_invalid_label,
             allow_nan_forecast=allow_nan_forecast,
         )
-
+        
         for evaluator in evaluators.values():
             evaluator.update(data_batch)
 
@@ -208,6 +208,7 @@ def evaluate_forecasts(
         allow_nan_forecast=allow_nan_forecast,
         seasonality=seasonality,
     )
+
     index0 = metrics_values.pop("__index_0", None)
 
     metric_shape = metrics_values[first(metrics_values)].shape

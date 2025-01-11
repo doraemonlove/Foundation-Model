@@ -1,11 +1,11 @@
 #!/bin/bash
 
-RUN_NAME="ecl_eval_1"
+RUN_NAME="heating_eval_1"
 MODEL="moirai_moe_1.0_R_base"
 PATCH_SIZE=16
 CONTEXT_LENGTH=512
-for i in 48; do
-DATA="ecl_test_$i"
+for i in 12; do
+DATA="heating_test_$i"
 
 # 执行 Python 命令并传入参数
 python -m cli.eval \
