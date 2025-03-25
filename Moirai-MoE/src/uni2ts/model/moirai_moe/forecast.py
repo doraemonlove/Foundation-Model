@@ -17,7 +17,7 @@ import math
 from contextlib import contextmanager
 from copy import deepcopy
 from typing import Any, Generator, Optional
-
+import time
 import lightning as L
 import numpy as np
 import torch
@@ -249,15 +249,15 @@ class MoiraiMoEForecast(L.LightningModule):
             Float[torch.Tensor, "batch past_time past_feat"]
         ] = None,
         past_observed_feat_dynamic_real: Optional[
-            Float[torch.Tensor, "batch past_time past_feat"]
+            Bool[torch.Tensor, "batch past_time past_feat"]
         ] = None,
         num_samples: Optional[int] = None,
     ) -> Float[torch.Tensor, "batch sample future_time *tgt"]:
+        print("forecast forward")
         context_step = self.context_token_length(self.hparams.patch_size)
         context_token = self.hparams.target_dim * context_step
         predict_step = self.prediction_token_length(self.hparams.patch_size)
         predict_token = self.hparams.target_dim * predict_step
-
         (
             target,
             observed_mask,
@@ -275,6 +275,7 @@ class MoiraiMoEForecast(L.LightningModule):
             past_feat_dynamic_real=past_feat_dynamic_real,
             past_observed_feat_dynamic_real=past_observed_feat_dynamic_real,
         )
+        print(f"target: {target.shape}\n observed_mask: {observed_mask.shape}\n sample_id: {sample_id.shape}\n time_id: {time_id.shape}\n variate_id: {variate_id.shape}\n prediction_mask: {prediction_mask.shape}")
         patch_size = (
             torch.ones_like(time_id, dtype=torch.long) * self.hparams.patch_size
         )
@@ -289,6 +290,7 @@ class MoiraiMoEForecast(L.LightningModule):
         )
 
         if predict_step == 1:
+            print("predict_step == 1")
             distr = self.module(
                 target,
                 observed_mask,
@@ -299,11 +301,13 @@ class MoiraiMoEForecast(L.LightningModule):
                 patch_size,
             )
             preds = distr.sample(torch.Size((num_samples or self.hparams.num_samples,)))
+            print(f"preds: {preds.shape}")
             preds[..., assign_index, :] = preds[..., pred_index, :]
             return self._format_preds(
                 self.hparams.patch_size, preds, self.hparams.target_dim
             )
         else:
+            print("predict_step > 1")
             distr = self.module(
                 target,
                 observed_mask,
@@ -313,8 +317,10 @@ class MoiraiMoEForecast(L.LightningModule):
                 prediction_mask,
                 patch_size,
             )
+            print("get distr")
             preds = distr.sample(torch.Size((self.hparams.num_samples,)))
-
+            
+            preds[..., assign_index, :] = preds[..., pred_index, :]
             expand_target = target.unsqueeze(0).repeat(
                 self.hparams.num_samples, 1, 1, 1
             )
@@ -339,7 +345,9 @@ class MoiraiMoEForecast(L.LightningModule):
 
             expand_target[..., assign_index, :] = preds[..., pred_index, :]
             expand_prediction_mask[..., assign_index] = False
-
+            
+            print(f"expand_target: {expand_target.shape}\n expand_observed_mask: {expand_observed_mask.shape}\n expand_sample_id: {expand_sample_id.shape}\n expand_time_id: {expand_time_id.shape}\n expand_variate_id: {expand_variate_id.shape}\n expand_prediction_mask: {expand_prediction_mask.shape}")
+        
             remain_step = predict_step - 1
             while remain_step > 0:
                 distr = self.module(
@@ -352,9 +360,6 @@ class MoiraiMoEForecast(L.LightningModule):
                     expand_patch_size,
                 )
                 preds = distr.sample(torch.Size((1,)))
-                _, _, bs, token, ps = preds.shape
-                preds = preds.view(-1, bs, token, ps)
-
                 pred_index = assign_index
                 assign_index = assign_index + 1
                 expand_target[..., assign_index, :] = preds[..., pred_index, :]

@@ -1,60 +1,64 @@
 task_dataset:    
-  Solar:
+  HEATING_CL512_PL32:
     task_name: long_term_forecast
-    dataset_name: solar_10_minutes
-    dataset: Solar
-    data: gluonts
-    root_path: ../dataset/gluonts
-    seq_len: 128
+    dataset_name: heating_cl512_pl32
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 32
+    features: M
+    embed: timeF
+    enc_in: 24
+    dec_in: 24
+    c_out: 24
+
+  HEATING_CL512_PL64:
+    task_name: long_term_forecast
+    dataset_name: heating_cl512_pl64
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
     label_len: 0
     pred_len: 64
     features: M
     embed: timeF
-    enc_in: 137
-    dec_in: 137
-    c_out: 137
+    enc_in: 24
+    dec_in: 24
+    c_out: 24
 
-  Saugeen_River:
+  HEATING_CL512_PL256:
     task_name: long_term_forecast
-    dataset_name: saugeenday
-    dataset: Saugeen_River
-    data: gluonts
-    root_path: ../dataset/gluonts
-    seq_len: 256
+    dataset_name: heating_cl512_pl256
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
     label_len: 0
-    pred_len: 128
+    pred_len: 256
     features: M
     embed: timeF
-    enc_in: 1
-    dec_in: 1
-    c_out: 1
+    enc_in: 24
+    dec_in: 24
+    c_out: 24
 
-  Hospital:
+  HEATING_CL512_PL512:
     task_name: long_term_forecast
-    dataset_name: hospital
-    dataset: Hospital
-    data: gluonts
-    root_path: ../dataset/gluonts
-    seq_len: 32
+    dataset_name: heating_cl512_pl512
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
     label_len: 0
-    pred_len: 16
+    pred_len: 512
     features: M
     embed: timeF
-    enc_in: 767
-    dec_in: 767
-    c_out: 767 
-
-  Web_Traffic:
-    task_name: long_term_forecast
-    dataset_name: kaggle_web_traffic_without_missing
-    dataset: Web_Traffic
-    data: gluonts
-    root_path: ../dataset/gluonts
-    seq_len: 160
-    label_len: 0
-    pred_len: 80
-    features: M
-    embed: timeF
-    enc_in: 500
-    dec_in: 500
-    c_out: 500
+    enc_in: 24
+    dec_in: 24
+    c_out: 24

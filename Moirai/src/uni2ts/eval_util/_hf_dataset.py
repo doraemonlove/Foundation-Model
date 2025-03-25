@@ -12,7 +12,7 @@ class HFDataset:
         ).with_format("numpy")
         self.freq = self.hf_dataset[0]["freq"]
         self.target_dim = (
-            target.shape[-1]
+            target.shape[0]
             if len((target := self.hf_dataset[0]["target"]).shape) > 1
             else 1
         )

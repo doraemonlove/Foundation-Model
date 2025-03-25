@@ -2,6 +2,6 @@ _target_: uni2ts.model.moirai_moe.MoiraiMoEForecast
 module:
   _target_: uni2ts.model.moirai_moe.MoiraiMoEModule.from_pretrained
   pretrained_model_name_or_path: model/moirai-moe-1.0-R-base
-num_samples: 100
+num_samples: 5
 patch_size: 16
 context_length: ???

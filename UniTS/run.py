@@ -3,7 +3,6 @@ import torch
 from exp.exp_sup import Exp_All_Task as Exp_All_Task_SUP
 import random
 import numpy as np
-import wandb
 from utils.ddp import is_main_process, init_distributed_mode
 
 
@@ -12,7 +11,7 @@ if __name__ == '__main__':
 
     # basic config
     parser.add_argument('--task_name', type=str, required=False, default='ALL_task',
-                        help='task name')
+                        help='task name')    
     parser.add_argument('--is_training', type=int,
                         required=True, default=1, help='status')
     parser.add_argument('--model_id', type=str, required=True,
@@ -132,16 +131,6 @@ if __name__ == '__main__':
     if int(args.prompt_tune_epoch) != 0:
         exp_name = 'Ptune'+str(args.prompt_tune_epoch)+'_'+exp_name
         print(exp_name)
-
-    if is_main_process():
-        wandb.init(
-            name=exp_name,
-            # set the wandb project where this run will be logged
-            project=args.project_name,
-            # track hyperparameters and run metadata
-            config=args,
-            mode=args.debug,
-        )
 
     Exp = Exp_All_Task_SUP
 

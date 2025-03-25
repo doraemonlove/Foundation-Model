@@ -44,7 +44,7 @@ def data_provider(args, config, flag, ddp=False):  # args,
         freq = args.freq
     else:
         shuffle_flag = True
-        drop_last = True
+        drop_last = False
         batch_size = args.batch_size  # bsz for train and valid
         freq = args.freq
 

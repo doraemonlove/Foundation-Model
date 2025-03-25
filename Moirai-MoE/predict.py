@@ -1,7 +1,6 @@
 import torch
 import pandas as pd
 import argparse
-import taos
 from uni2ts.model.moirai_moe import MoiraiMoEForecast, MoiraiMoEModule
 import numpy as np
 import datetime
@@ -12,10 +11,6 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import csv
 
-taos_host = ''
-taos_user = ''
-taos_password = ''
-taos_database = ''
 PRED_WINDOW = datetime.timedelta(hours=4)
 INTERVAL = datetime.timedelta(minutes=3)
 PRED_LEN = PRED_WINDOW // INTERVAL
@@ -28,19 +23,13 @@ metrics = [
     'rpst', 'rprt', 'rpsif', 'rpsih',
     'rsst', 'rsrt', 'rssif', 'rssih',
     'acpst', 'acprt', 'acpsif', 'acpsih',
-    'acsst', 'acsrt',
-    'ot', 'oh', 'oli'
+    'rpvo1', 'rpvo2', 'acpvo1', 'acpvo2',
+    'rpf1', 'rpf2', 'rpf3', 'acpf1', 'acpf2', 'acpf3', 'acpf4'
 ]
-
-class TaosAPI:
-    def __init__(self, host='localhost', user='root', password='taosdata', database='test'):
-        # 初始化连接信息
-        self.host = host
-        self.user = user
-        self.password = password
-        self.database = database
-        self.conn = taos.connect(host=self.host, user=self.user, password=self.password, database=self.database)
-        self.cursor = self.conn.cursor()
+# 定义动态特征的列名
+dynamic_feature_cols = [
+    'oh', 'oli', 'ot'
+]
 
 class MoiraiMoE:
     def __init__(self, args):
@@ -51,9 +40,9 @@ class MoiraiMoE:
             context_length=self.args.context_length,
             patch_size=self.args.patch_size,
             num_samples=self.args.num_samples,
-            target_dim=17,
-            feat_dynamic_real_dim=0,
-            past_feat_dynamic_real_dim=0
+            target_dim=self.args.target_dim,
+            feat_dynamic_real_dim=self.args.feat_dynamic_real_dim,
+            past_feat_dynamic_real_dim=self.args.past_feat_dynamic_real_dim
         )
 
     def predict(self, input_data):
@@ -75,7 +64,6 @@ def load_datafile(
         parse_dates=True,
         index_col="ts",
     )
-    raw_data = raw_data[metrics]
 
     data = raw_data.resample(interval, origin="start").mean()
     
@@ -84,11 +72,14 @@ def load_datafile(
         data.iloc[data.index < start],
     )
 
+
+
 def load_param_data(
     data_dir: str,
     label_filename: str,
     window: datetime.timedelta = PRED_WINDOW,
     interval: datetime.timedelta = INTERVAL,
+    use_dynamic_features: bool = True,
 ):
     with open(label_filename, encoding=ENCODING) as obj:
         labels = json.load(obj)
@@ -104,20 +95,43 @@ def load_param_data(
             interval=interval,
         )
         if within.shape[0] >= PRED_LEN and before.shape[0] >= PRED_LEN:
-            # 转换数据格式为模型所需的输入格式
-            before_values = before.iloc[-PRED_LEN:].values
+            # 转换目标数据格式为模型所需的输入格式
+            before_values = before.iloc[-PRED_LEN:][metrics].values
             before_values = torch.as_tensor(before_values, dtype=torch.float32)
             before_values = before_values.reshape(1, -1, before_values.shape[1])
             
-            # 创建观察掩码和填充掩码
-            past_observed_target = torch.ones_like(before_values, dtype=torch.bool)
-            past_is_pad = torch.zeros((1, before_values.shape[1]), dtype=torch.bool)
-            
             past_dict = {
                 "past_target": before_values,
-                "past_observed_target": past_observed_target,
-                "past_is_pad": past_is_pad
+                "past_observed_target": torch.ones_like(before_values, dtype=torch.bool),
+                "past_is_pad": torch.zeros((1, before_values.shape[1]), dtype=torch.bool),
             }
+            
+            # 仅在需要时添加动态特征
+            if use_dynamic_features:
+                # 创建动态特征数据
+                dynamic_features_before = before.iloc[-PRED_LEN:][dynamic_feature_cols].values
+                dynamic_features_within = within.iloc[:PRED_LEN][dynamic_feature_cols].values
+                
+                # 转换为张量
+                feat_dynamic_real = torch.as_tensor(dynamic_features_within, dtype=torch.float32)
+                feat_dynamic_real = feat_dynamic_real.reshape(1, PRED_LEN, len(dynamic_feature_cols))
+                
+                past_dynamic_features = torch.as_tensor(dynamic_features_before, dtype=torch.float32)
+                past_dynamic_features = past_dynamic_features.reshape(1, PRED_LEN, len(dynamic_feature_cols))
+                
+                # 连接历史和未来的动态特征
+                past_feat_dynamic_real = torch.cat([
+                    past_dynamic_features,
+                    feat_dynamic_real
+                ], dim=1)
+                
+                # 添加动态特征相关的字段
+                past_dict.update({
+                    "feat_dynamic_real": feat_dynamic_real,
+                    "observed_feat_dynamic_real": torch.ones_like(feat_dynamic_real, dtype=torch.bool),
+                    "past_feat_dynamic_real": past_feat_dynamic_real,
+                    "past_observed_feat_dynamic_real": torch.ones_like(past_feat_dynamic_real, dtype=torch.bool)
+                })
             
             data.append({
                 "past": past_dict,
@@ -346,12 +360,30 @@ if __name__ == '__main__':
         help='预测结果处理方法'
     )
 
+    parser.add_argument(
+        '--target_dim',
+        type=int,
+        default=12,
+        help='Target dimension'
+    )
+
+    parser.add_argument(
+        '--feat_dynamic_real_dim',
+        type=int,
+        default=11,
+    )
+
+    parser.add_argument(
+        '--past_feat_dynamic_real_dim',
+        type=int,
+        default=11,
+    )
     args = parser.parse_args()
 
-    device = 'cpu'
+    device = 'auto'
 
     # input_data = collect_data(args.start_time, args.end_time, args.context_length)
-    input_data = load_param_data('dataset/heating', 'dataset/heating/labels-1230-test.json')
+    input_data = load_param_data('dataset/heating', 'dataset/heating/labels-pretrain.json', use_dynamic_features=False)
     
     model = MoiraiMoE(args)
 

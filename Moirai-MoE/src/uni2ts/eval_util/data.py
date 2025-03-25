@@ -23,6 +23,7 @@ class MetaData(NamedTuple):
     feat_dynamic_real_dim: int = 0
     past_feat_dynamic_real_dim: int = 0
     split: str = "test"
+    column_names: list[str] = None
 
 
 def get_gluonts_val_dataset(

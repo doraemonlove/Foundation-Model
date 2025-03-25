@@ -25,7 +25,18 @@ def RMSE(pred, true):
 
 
 def MAPE(pred, true):
-    return np.mean(np.abs((pred - true) / true))
+    # 避免除以零
+    mask = true != 0
+    if not np.any(mask):
+        return np.nan
+    return np.mean(np.abs((pred[mask] - true[mask]) / true[mask])) * 100
+
+def SMAPE(pred, true):
+    # 避免除以零
+    mask = true != 0
+    if not np.any(mask):
+        return np.nan
+    return 200 * np.mean(np.abs(pred[mask] - true[mask]) / (np.abs(pred[mask]) + np.abs(true[mask])))
 
 
 def MSPE(pred, true):
@@ -35,8 +46,7 @@ def MSPE(pred, true):
 def metric(pred, true):
     mae = MAE(pred, true)
     mse = MSE(pred, true)
-    rmse = RMSE(pred, true)
     mape = MAPE(pred, true)
-    mspe = MSPE(pred, true)
+    smape = SMAPE(pred, true)
 
-    return mae, mse, rmse, mape, mspe
+    return mae, mse, mape, smape
