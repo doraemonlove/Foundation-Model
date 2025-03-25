@@ -1,7 +1,7 @@
 _target_: uni2ts.eval_util.data.get_custom_eval_dataset
-dataset_name: ECL_test
-offset: 4000
-windows: 1800
+dataset_name: heating_test_uni
+offset: 500
+windows: 125
 distance: 12
-prediction_length: 512
+prediction_length: 256
 mode: null

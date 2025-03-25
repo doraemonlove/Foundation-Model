@@ -5,7 +5,7 @@ exp_name=fewshot_newdata_finetune_pct20
 random_port=$((RANDOM % 9000 + 1000))
 # Path to the supervised checkpoint
 # get supervised checkpoint: scripts/supervised/UniTS_supervised_x64.sh
-ckpt_path=newcheckpoints/units_x64_supervised_checkpoint.pth
+ckpt_path=checkpoints/units_x128_pretrain_checkpoint.pth
 torchrun --nnodes 1 --master_port $random_port run.py \
   --is_training 1 \
   --fix_seed 2021 \
@@ -16,7 +16,7 @@ torchrun --nnodes 1 --master_port $random_port run.py \
   --patch_len 16 \
   --stride 16 \
   --e_layers 3 \
-  --d_model 64 \
+  --d_model 128 \
   --des 'Exp' \
   --train_epochs 5 \
   --learning_rate 1e-4 \

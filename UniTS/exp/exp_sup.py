@@ -21,7 +21,6 @@ import time
 import warnings
 import numpy as np
 import yaml
-import wandb
 import sys
 import copy
 
@@ -354,8 +353,6 @@ class Exp_All_Task(object):
                                os.path.join(path, 'checkpoint.pth'))
 
         if is_main_process():
-            wandb.log({'Final_LF-mse': avg_forecast_mse,
-                       'Final_LF-mae': avg_forecast_mae, 'Final_CLS-acc': avg_cls_acc})
             print("Final score: LF-mse: {}, LF-mae: {}, CLS-acc {}".format(avg_forecast_mse,
                                                                            avg_forecast_mae, avg_cls_acc), folder=self.path)
 
@@ -425,10 +422,6 @@ class Exp_All_Task(object):
             del sample_list
             if torch.cuda.memory_reserved(current_device) > 30*1e9:
                 torch.cuda.empty_cache()
-
-            if is_main_process():
-                wandb.log(
-                    {'train_loss_'+self.task_data_config_list[task_id][0]: loss_display, 'norm_value': norm_value, "loss_sum": loss_sum_display/(i+1)})
 
             if (i + 1) % 100 == 0:
                 if norm_value == None:
@@ -574,34 +567,23 @@ class Exp_All_Task(object):
                         setting, test_data, test_loader, data_task_name, task_id)
                 data_task_name = self.task_data_config_list[task_id][0]
                 total_dict[data_task_name] = {'mse': mse, 'mae': mae}
-                if is_main_process():
-                    wandb.log({'eval_LF-mse_'+data_task_name: mse})
-                    wandb.log({'eval_LF-mae_'+data_task_name: mae})
                 avg_long_term_forecast_mse.append(mse)
                 avg_long_term_forecast_mae.append(mae)
             elif task_name == 'classification':
                 acc = self.test_classification(
                     setting, test_data, test_loader, data_task_name, task_id)
                 total_dict[data_task_name] = {'acc': acc}
-                if is_main_process():
-                    wandb.log({'eval_CLS-acc_'+data_task_name: acc})
                 avg_classification_acc.append(acc)
             elif task_name == 'imputation':
                 mse, mae = self.test_imputation(
                     setting, test_data, test_loader, data_task_name, task_id)
                 total_dict[data_task_name] = {'mse': mse, 'mae': mae}
-                if is_main_process():
-                    wandb.log({'eval_Imputation-mse_'+data_task_name: mse})
-                    wandb.log({'eval_Imputation-mae_'+data_task_name: mae})
                 avg_imputation_mse.append(mse)
                 avg_imputation_mae.append(mae)
             elif task_name == 'anomaly_detection':
                 f_score = self.test_anomaly_detection(
                     setting, test_data, test_loader, data_task_name, task_id)
                 total_dict[data_task_name] = {'f_score': f_score}
-                if is_main_process():
-                    wandb.log({'eval_Anomaly-f_score_' +
-                              data_task_name: f_score})
                 avg_anomaly_f_score.append(f_score)
 
         avg_long_term_forecast_mse = np.average(avg_long_term_forecast_mse)
@@ -613,15 +595,9 @@ class Exp_All_Task(object):
         avg_imputation_mae = np.average(avg_imputation_mae)
 
         avg_anomaly_f_score = np.average(avg_anomaly_f_score)
-
-        if is_main_process():
-            wandb.log({'avg_eval_LF-mse': avg_long_term_forecast_mse, 'avg_eval_LF-mae': avg_long_term_forecast_mae,
-                       'avg_eval_CLS-acc': avg_classification_acc,
-                       'avg_eval_IMP-mse': avg_imputation_mse, 'avg_eval_IMP-mae': avg_imputation_mae,
-                       'avg_eval_Anomaly-f_score': avg_anomaly_f_score})
-            print("Avg score: LF-mse: {}, LF-mae: {}, CLS-acc {}, IMP-mse: {}, IMP-mae: {}, Ano-F: {}".format(avg_long_term_forecast_mse,
-                                                                                                              avg_long_term_forecast_mae, avg_classification_acc, avg_imputation_mse, avg_imputation_mae, avg_anomaly_f_score), folder=self.path)
-            print(total_dict, folder=self.path)
+            # print("Avg score: LF-mse: {}, LF-mae: {}, CLS-acc {}, IMP-mse: {}, IMP-mae: {}, Ano-F: {}".format(avg_long_term_forecast_mse,
+            #                                                                                                   avg_long_term_forecast_mae, avg_classification_acc, avg_imputation_mse, avg_imputation_mae, avg_anomaly_f_score), folder=self.path)
+            # print(total_dict, folder=self.path)
         return avg_classification_acc, avg_long_term_forecast_mse, avg_long_term_forecast_mae
 
     def test_long_term_forecast(self, setting, test_data, test_loader, data_task_name, task_id):
@@ -632,14 +608,13 @@ class Exp_All_Task(object):
 
         preds = []
         trues = []
-
+        
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, _, _) in enumerate(test_loader):
                 batch_x = batch_x.float().to(self.device_id)
                 batch_y = batch_y.float().to(self.device_id)
 
-                dec_inp = None
                 dec_inp = None
                 batch_x_mark = None
                 batch_y_mark = None
@@ -654,6 +629,7 @@ class Exp_All_Task(object):
 
                 outputs = outputs.detach().cpu()
                 batch_y = batch_y.detach().cpu()
+                
                 if test_data.scale and self.args.inverse:
                     outputs = test_data.inverse_transform(outputs)
                     batch_y = test_data.inverse_transform(batch_y)
@@ -673,9 +649,9 @@ class Exp_All_Task(object):
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
 
-        mae, mse, rmse, mape, mspe = metric(preds, trues)
-        print('data_task_name: {} mse:{}, mae:{}'.format(
-            data_task_name, mse, mae), folder=self.path)
+        mae, mse, mape, smape = metric(preds, trues)
+        print('data_task_name: {} target: {} mse:{}, mae:{}, mape:{}, smape:{}'.format(
+            data_task_name, self.args.target, mse, mae, mape, smape), folder=self.path)
         torch.cuda.empty_cache()
         return mse, mae
 
@@ -833,17 +809,26 @@ class Exp_All_Task(object):
     def test_long_term_forecast_offset_unify(self, setting, test_data, test_loader, data_task_name, task_id):
         config = self.task_data_config_list[task_id][1]
         pred_len = config['pred_len']
-        features = config['features']
-        max_pred_len = pred_len-self.args.offset+self.args.max_offset
-
+        
+        print(f"Current offset: {self.args.offset}")
+        print(f"Current max_offset: {self.args.max_offset}")
+        print(f"Current pred_len from config: {pred_len}")
+        print(f"Task config: {config}")
+        print(f"seq_len + pred_len: {config['seq_len'] + config['pred_len']}")
+        print(f"patch_len: {self.args.patch_len}")  
+        print(f"stride: {self.args.stride}")
+        print("="*50)
+        pred_len = config['pred_len'] 
+        # pred_len = config['pred_len'] - config['seq_len']
+        print('pred_len', pred_len)
         preds = []
         trues = []
+        
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, _, _) in enumerate(test_loader):
                 batch_x = batch_x.float().to(self.device_id)
                 batch_y = batch_y.float().to(self.device_id)
-                batch_y = batch_y[:,-max_pred_len:][:,:pred_len]
 
                 dec_inp = None
                 batch_x_mark = None
@@ -853,32 +838,80 @@ class Exp_All_Task(object):
                     outputs = self.model(
                         batch_x, batch_x_mark, dec_inp, batch_y_mark, task_id=task_id, task_name='long_term_forecast')
 
-                f_dim = -1 if features == 'MS' else 0
-                outputs = outputs[:, -pred_len:, f_dim:]
 
-                outputs = outputs.detach().cpu()
-                batch_y = batch_y.detach().cpu()
+                # 只取预测部分（最后pred_len个点）
+                outputs = outputs[:, -(config['pred_len'] - config['seq_len']):, :]  # [B, pred_len, N]
+                batch_y = batch_y[:, -(config['pred_len'] - config['seq_len']):, :]  # [B, pred_len, N]
                 if test_data.scale and self.args.inverse:
                     outputs = test_data.inverse_transform(outputs)
                     batch_y = test_data.inverse_transform(batch_y)
 
-                pred = outputs
-                true = batch_y
+                preds.append(outputs.detach().cpu().numpy())
+                trues.append(batch_y.detach().cpu().numpy())
 
-                preds.append(pred)
-                trues.append(true)
+        preds = np.concatenate(preds, axis=0)  # [num_windows, pred_len, N]
+        trues = np.concatenate(trues, axis=0)  # [num_windows, pred_len, N]
+        print(preds.shape)
+        print(trues.shape)
+        # 保存结果
+        # save_path = os.path.join(self.path, f'{data_task_name}_predictions.npz')
+        # np.savez(save_path, predictions=preds, ground_truth=trues)
+        # 在绘图前进行反标准化
+        if test_data.scale:
+            preds = test_data.inverse_transform(preds)
+            trues = test_data.inverse_transform(trues)
+        # 只取target列计算指标
+        target_idx = -1  # target在最后一列
+        pred_target = preds[:, :, target_idx]  # [num_windows, pred_len]
+        true_target = trues[:, :, target_idx]  # [num_windows, pred_len]
 
-        preds = gather_tensors_from_all_gpus(preds, self.device_id)
-        trues = gather_tensors_from_all_gpus(trues, self.device_id)
-        preds = np.array(preds)
-        trues = np.array(trues)
-        preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
-        trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
+        
+        print('pred_target', pred_target.shape)
+        print('true_target', true_target.shape)
+        # 计算评价指标
+        mae, mse, mape, smape = metric(pred_target, true_target)
+        
+        print('=' * 50)
+        print(f'Evaluation metrics for {data_task_name}:')
+        print(f'Target: {self.args.target}')
+        print(f'Predictions shape: {pred_target.shape}')  # 打印形状以验证
+        print(f'MSE: {mse:.4f}')
+        print(f'MAE: {mae:.4f}')
+        print(f'SMAPE: {smape:.4f}%')
+        print(f'MAPE: {mape:.4f}%')
+        
+        print('=' * 50)
+        
+        # 绘制结果
+        import plotly.graph_objects as go
+        
+        # 随机选择一个窗口进行可视化
+        window_idx = np.random.randint(0, pred_target.shape[0])
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            y=true_target[window_idx],
+            mode='lines',
+            name='Ground Truth',
+            line=dict(color='blue')
+        ))
+        fig.add_trace(go.Scatter(
+            y=pred_target[window_idx],
+            mode='lines',
+            name='Prediction',
+            line=dict(color='red')
+        ))
+        
+        fig.update_layout(
+            title=f'{data_task_name} - Target: {self.args.target} (Window {window_idx})',
+            xaxis_title='Prediction Step',
+            yaxis_title='Value',
+            showlegend=True
+        )
+        
+        fig.write_html(os.path.join(self.path, f'{data_task_name}_plot.html'))
+        
 
-        mae, mse, rmse, mape, mspe = metric(preds, trues)
-        print('data_task_name: {} mse:{}, mae:{}'.format(
-            data_task_name, mse, mae), folder=self.path)
-        torch.cuda.empty_cache()
         return mse, mae
 
     def split_batch(self, batch, small_batch_size, task_name):

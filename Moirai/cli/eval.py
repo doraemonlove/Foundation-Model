@@ -20,7 +20,8 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.utils import call, instantiate
 from omegaconf import DictConfig
 from torch.utils.tensorboard import SummaryWriter
-
+import pandas as pd
+import os
 from uni2ts.common import hydra_util  # noqa: hydra resolvers
 from uni2ts.eval_util.evaluation import evaluate_model
 
@@ -49,17 +50,16 @@ def main(cfg: DictConfig):
                 allow_nan_forecast=False,
                 seasonality=get_seasonality(metadata.freq),
             )
-            print(res)
+
             output_dir = HydraConfig.get().runtime.output_dir
-            # writer = SummaryWriter(log_dir=output_dir)
-            # for name, metric in res.to_dict("records")[0].items():
-            #     writer.add_scalar(f"{metadata.split}_metrics/{name}", metric)
-            # writer.close()
-            result_path = f"{output_dir}/result.txt"
-            with open(result_path, "a") as f:  # 使用追加模式
-                f.write(f"Output directory: {output_dir}\n")
-                for name, metric in res.to_dict("records")[0].items():
-                    f.write(f"{metadata.split}_metrics/{name}: {metric}\n")
+            result_path = f"{output_dir}/results.csv"
+            
+            # 将结果转换为DataFrame并保存
+            results_dict = res.to_dict("records")[0]
+            df = pd.DataFrame([results_dict])
+            
+            # 如果文件存在就追加，不存在就创建新文件
+            df.to_csv(result_path, mode='a', header=not os.path.exists(result_path), index=False)
             break
         except torch.cuda.OutOfMemoryError:
             print(

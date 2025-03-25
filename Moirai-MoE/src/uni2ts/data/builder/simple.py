@@ -222,6 +222,7 @@ class SimpleDatasetBuilder(DatasetBuilder):
             example_gen_func, features=features
         )
         hf_dataset.info.dataset_name = self.dataset
+
         hf_dataset.save_to_disk(self.storage_path / self.dataset)
 
     def load_dataset(

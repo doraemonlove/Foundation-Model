@@ -1,9 +1,9 @@
 model_name=UniTS_zeroshot
-exp_name=UniTS_zeroshot_pretrain_x64
-wandb_mode=online
+exp_name=UniTS_zeroshot_pretrain_x128
+wandb_mode=disabled
 ptune_name=zeroshot_newdata
 
-d_model=64
+d_model=128
 
 random_port=$((RANDOM % 9000 + 1000))
 
@@ -32,20 +32,21 @@ torchrun --nnodes 1 --nproc-per-node 2 --master_port $random_port run_pretrain.p
   --debug $wandb_mode \
   --task_data_config_path data_provider/multi_task_pretrain.yaml
 
-# Zero-shot test on new forecasting datasets
-# Note: The inference in this code test all samples of the dataset, 
-# which is not the same as the original paper that only test 1 sample for each dataset.
-torchrun --nnodes 1 --master_port $random_port run.py \
-  --is_training 0 \
-  --model_id $exp_name \
-  --model $model_name \
-  --prompt_num 10 \
-  --patch_len 16 \
-  --stride 16 \
-  --e_layers 3 \
-  --d_model $d_model \
-  --des 'Exp' \
-  --debug $wandb_mode \
-  --project_name $ptune_name \
-  --pretrained_weight auto \
-  --task_data_config_path  data_provider/zeroshot_task.yaml
+# ckpt_path=checkpoints/units_x128_pretrain_checkpoint.pth
+# # Zero-shot test on new forecasting datasets
+# # Note: The inference in this code test all samples of the dataset, 
+# # which is not the same as the original paper that only test 1 sample for each dataset.
+# torchrun --nnodes 1 --master_port $random_port run.py \
+#   --is_training 0 \
+#   --model_id $exp_name \
+#   --model $model_name \
+#   --prompt_num 10 \
+#   --patch_len 16 \
+#   --stride 16 \
+#   --e_layers 3 \
+#   --d_model $d_model \
+#   --des 'Exp' \
+#   --debug $wandb_mode \
+#   --project_name $ptune_name \
+#   --pretrained_weight $ckpt_path \
+#   --task_data_config_path  data_provider/zeroshot_task.yaml
