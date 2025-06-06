@@ -2,7 +2,8 @@ import argparse
 import torch
 import yaml
 import numpy as np
-from models.UniTS_zeroshot import Model
+from models.UniTS_zeroshot import Model as Zeroshot_Model
+from models.UniTS import Model as Finetune_Model
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import os
@@ -11,15 +12,38 @@ import traceback
 ENCODING = 'utf-8'
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus'] = False  
+# metrics = [
+#     'rpst', 'rprt', 'rpsif', 'rpsih',
+#     'rsst', 'rsrt', 'rssif', 'rssih',
+#     'acpst', 'acprt', 'acpsif', 'acpsih',
+#     'mrih',
+#     'rpvo1', 'rpvo2', 'acpvo1', 'acpvo2',
+#     'rpf1', 'rpf2', 'rpf3', 'acpf1', 'acpf2', 'acpf3', 'acpf4'
+# ]
 metrics = [
     'rpst', 'rprt', 'rpsif', 'rpsih',
     'rsst', 'rsrt', 'rssif', 'rssih',
     'acpst', 'acprt', 'acpsif', 'acpsih',
-    'mrih',
-    'rpvo1', 'rpvo2', 'acpvo1', 'acpvo2',
-    'rpf1', 'rpf2', 'rpf3', 'acpf1', 'acpf2', 'acpf3', 'acpf4'
+    'mrih'
 ]
 
+# metrics = [
+#     'rpst', 'rprt', 'rpsif', 'rpsih',
+#     'acpst', 'acprt', 'acpsif', 'acpsih',
+#     'mrih'
+# ]
+
+# metrics = [
+#     'rprt', 'rpsif',
+#     'acprt', 'acpsif',
+#     'mrih'
+# ]
+
+# metrics = [
+#     'rpsif',
+#     'acpsif',
+#     'mrih'
+# ]
 def read_task_data_config(config_path):
     with open(config_path, 'r') as config_file:
         config = yaml.load(config_file, Loader=yaml.FullLoader)
@@ -36,11 +60,14 @@ def get_task_data_config_list(task_data_config, default_batch_size=None):
 
     return task_data_config_list
 
-class UniTS_Zeroshot:
+class UniTS:
     def __init__(self, args, task_data_config_list):
         self.args = args
         self.task_data_config_list = task_data_config_list
-        self.model = Model(args, task_data_config_list)
+        if args.is_finetuning:
+            self.model = Finetune_Model(args, task_data_config_list)
+        else:
+            self.model = Zeroshot_Model(args, task_data_config_list)
 
         if os.path.exists(self.args.pretrained_weight):
             pretrain_weight_path = self.args.pretrained_weight
@@ -251,11 +278,11 @@ if __name__ == '__main__':
     # basic config
     parser.add_argument('--task_name', type=str, required=False, default='ALL_task',
                         help='task name')    
-    parser.add_argument('--is_training', type=int,
+    parser.add_argument('--is_finetuning', type=int,
                         required=True, default=1, help='status')
-    parser.add_argument('--model_id', type=str, required=True,
+    parser.add_argument('--model_id', type=str, required=False,
                         default='test', help='model id')
-    parser.add_argument('--model', type=str, required=True, default='UniTS',
+    parser.add_argument('--model', type=str, required=False, default='UniTS',
                         help='model name')
 
     # data loader
@@ -362,7 +389,9 @@ if __name__ == '__main__':
         ('/home/jiaju/dataset/heating/heating_cl512_pl512.feather', 512, 512)
     ]
 
-    units = UniTS_Zeroshot(args, task_data_config_list)
+    os.makedirs(args.output_dir, exist_ok=True)
+    
+    units = UniTS(args, task_data_config_list)
 
     for idx, item in enumerate(data_list):
         data_path, context_length, prediction_length = item
@@ -377,7 +406,7 @@ if __name__ == '__main__':
             device=args.device
         )
 
-        output_dir = os.path.join(args.output_dir, f'{idx}')
+        output_dir = os.path.join(args.output_dir, f'pl{prediction_length}')
         os.makedirs(output_dir, exist_ok=True)
         
         final_results = {}

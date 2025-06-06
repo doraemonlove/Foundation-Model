@@ -1,7 +1,135 @@
 task_dataset:    
-  HEATING_CL512_PL32:
+  # HEATING_CL512_PL32:
+  #   task_name: long_term_forecast
+  #   dataset_name: heating_cl512_pl32
+  #   dataset: heating
+  #   data: custom
+  #   root_path: ./dataset/heating/
+  #   data_path: normal.csv
+  #   seq_len: 512
+  #   label_len: 0
+  #   pred_len: 32
+  #   features: M
+  #   embed: timeF
+  #   enc_in: 24
+  #   dec_in: 24
+  #   c_out: 24
+
+  # HEATING_CL512_PL64:
+  #   task_name: long_term_forecast
+  #   dataset_name: heating_cl512_pl64
+  #   dataset: heating
+  #   data: custom
+  #   root_path: ./dataset/heating/
+  #   data_path: normal.csv
+  #   seq_len: 512
+  #   label_len: 0
+  #   pred_len: 64
+  #   features: M
+  #   embed: timeF
+  #   enc_in: 24
+  #   dec_in: 24
+  #   c_out: 24
+
+  # HEATING_CL512_PL256:
+  #   task_name: long_term_forecast
+  #   dataset_name: heating_cl512_pl256
+  #   dataset: heating
+  #   data: custom
+  #   root_path: ./dataset/heating/
+  #   data_path: normal.csv
+  #   seq_len: 512
+  #   label_len: 0
+  #   pred_len: 256
+  #   features: M
+  #   embed: timeF
+  #   enc_in: 24
+  #   dec_in: 24
+  #   c_out: 24
+
+  # HEATING_CL512_PL512:
+  #   task_name: long_term_forecast
+  #   dataset_name: heating_cl512_pl512
+  #   dataset: heating
+  #   data: custom
+  #   root_path: ./dataset/heating/
+  #   data_path: normal.csv
+  #   seq_len: 512
+  #   label_len: 0
+  #   pred_len: 512
+  #   features: M
+  #   embed: timeF
+  #   enc_in: 24
+  #   dec_in: 24
+  #   c_out: 24
+
+  # HEATING_UNI_P32:
+  #   task_name: long_term_forecast
+  #   dataset_name: heating_uni_p32
+  #   dataset: heating
+  #   data: custom
+  #   root_path: ./dataset/heating/
+  #   data_path: normal.csv
+  #   seq_len: 512
+  #   label_len: 0
+  #   pred_len: 32
+  #   features: S
+  #   embed: timeF
+  #   enc_in: 1
+  #   dec_in: 1
+  #   c_out: 1
+
+  # HEATING_UNI_P64:
+  #   task_name: long_term_forecast
+  #   dataset_name: heating_uni_p64
+  #   dataset: heating
+  #   data: custom
+  #   root_path: ./dataset/heating/
+  #   data_path: normal.csv
+  #   seq_len: 512
+  #   label_len: 0
+  #   pred_len: 64
+  #   features: S
+  #   embed: timeF
+  #   enc_in: 1
+  #   dec_in: 1
+  #   c_out: 1
+
+  # HEATING_UNI_P256:
+  #   task_name: long_term_forecast
+  #   dataset_name: heating_uni_p256
+  #   dataset: heating
+  #   data: custom
+  #   root_path: ./dataset/heating/
+  #   data_path: normal.csv
+  #   seq_len: 512
+  #   label_len: 0
+  #   pred_len: 256
+  #   features: S
+  #   embed: timeF
+  #   enc_in: 1
+  #   dec_in: 1
+  #   c_out: 1
+
+  # HEATING_UNI_P512:
+  #   task_name: long_term_forecast
+  #   dataset_name: heating_uni_p512
+  #   dataset: heating
+  #   data: custom
+  #   root_path: ./dataset/heating/
+  #   data_path: normal.csv
+  #   seq_len: 512
+  #   label_len: 0
+  #   pred_len: 512
+  #   features: S
+  #   embed: timeF
+  #   enc_in: 1
+  #   dec_in: 1
+  #   c_out: 1
+  
+  HEATING_F13_P32:
     task_name: long_term_forecast
-    dataset_name: heating_cl512_pl32
+    dataset_name: heating_f13_p32
     dataset: heating
     data: custom
     root_path: ./dataset/heating/
@@ -11,13 +139,13 @@ task_dataset:
     pred_len: 32
     features: M
     embed: timeF
-    enc_in: 24
-    dec_in: 24
-    c_out: 24
+    enc_in: 13
+    dec_in: 13
+    c_out: 13
 
-  HEATING_CL512_PL64:
+  HEATING_F13_P64:
     task_name: long_term_forecast
-    dataset_name: heating_cl512_pl64
+    dataset_name: heating_f13_p64
     dataset: heating
     data: custom
     root_path: ./dataset/heating/
@@ -27,13 +155,13 @@ task_dataset:
     pred_len: 64
     features: M
     embed: timeF
-    enc_in: 24
-    dec_in: 24
-    c_out: 24
-
-  HEATING_CL512_PL256:
+    enc_in: 13
+    dec_in: 13
+    c_out: 13
+  
+  HEATING_F13_P256:
     task_name: long_term_forecast
-    dataset_name: heating_cl512_pl256
+    dataset_name: heating_f13_p256
     dataset: heating
     data: custom
     root_path: ./dataset/heating/
@@ -43,13 +171,13 @@ task_dataset:
     pred_len: 256
     features: M
     embed: timeF
-    enc_in: 24
-    dec_in: 24
-    c_out: 24
+    enc_in: 13
+    dec_in: 13
+    c_out: 13
 
-  HEATING_CL512_PL512:
+  HEATING_F13_P512:
     task_name: long_term_forecast
-    dataset_name: heating_cl512_pl512
+    dataset_name: heating_f13_p512
     dataset: heating
     data: custom
     root_path: ./dataset/heating/
@@ -59,6 +187,198 @@ task_dataset:
     pred_len: 512
     features: M
     embed: timeF
-    enc_in: 24
-    dec_in: 24
-    c_out: 24
+    enc_in: 13
+    dec_in: 13
+    c_out: 13
+
+    HEATING_F9_P32:
+    task_name: long_term_forecast
+    dataset_name: heating_f9_p32
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 32
+    features: M
+    embed: timeF
+    enc_in: 9
+    dec_in: 9
+    c_out: 9
+
+  HEATING_F9_P64:
+    task_name: long_term_forecast
+    dataset_name: heating_f9_p64
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 64
+    features: M
+    embed: timeF
+    enc_in: 9
+    dec_in: 9
+    c_out: 9
+  
+  HEATING_F9_P256:
+    task_name: long_term_forecast
+    dataset_name: heating_f9_p256
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 256
+    features: M
+    embed: timeF
+    enc_in: 9
+    dec_in: 9
+    c_out: 9
+
+  HEATING_F9_P512:
+    task_name: long_term_forecast
+    dataset_name: heating_f9_p512
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 512
+    features: M
+    embed: timeF
+    enc_in: 9
+    dec_in: 9
+    c_out: 9
+
+  HEATING_F5_P32:
+    task_name: long_term_forecast
+    dataset_name: heating_f5_p32
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 32
+    features: M
+    embed: timeF
+    enc_in: 5
+    dec_in: 5
+    c_out: 5
+
+  HEATING_F5_P64:
+    task_name: long_term_forecast
+    dataset_name: heating_f5_p64
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 64
+    features: M
+    embed: timeF
+    enc_in: 5
+    dec_in: 5
+    c_out: 5
+  
+  HEATING_F5_P256:
+    task_name: long_term_forecast
+    dataset_name: heating_f5_p256
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 256
+    features: M
+    embed: timeF
+    enc_in: 5
+    dec_in: 5
+    c_out: 5
+
+  HEATING_F5_P512:
+    task_name: long_term_forecast
+    dataset_name: heating_f5_p512
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 512
+    features: M
+    embed: timeF
+    enc_in: 5
+    dec_in: 5
+    c_out: 5
+
+  HEATING_F3_P32:
+    task_name: long_term_forecast
+    dataset_name: heating_f3_p32
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 32
+    features: M
+    embed: timeF
+    enc_in: 3
+    dec_in: 3
+    c_out: 3
+
+  HEATING_F3_P64:
+    task_name: long_term_forecast
+    dataset_name: heating_f3_p64
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 64
+    features: M
+    embed: timeF
+    enc_in: 3
+    dec_in: 3
+    c_out: 3
+  
+  HEATING_F3_P256:
+    task_name: long_term_forecast
+    dataset_name: heating_f3_p256
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 256
+    features: M
+    embed: timeF
+    enc_in: 3
+    dec_in: 3
+    c_out: 3
+
+  HEATING_F3_P512:
+    task_name: long_term_forecast
+    dataset_name: heating_f3_p512
+    dataset: heating
+    data: custom
+    root_path: ./dataset/heating/
+    data_path: normal.csv
+    seq_len: 512
+    label_len: 0
+    pred_len: 512
+    features: M
+    embed: timeF
+    enc_in: 3
+    dec_in: 3
+    c_out: 3

@@ -14,13 +14,19 @@ import traceback
 ENCODING = 'utf-8'
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus'] = False  
+# metrics = [
+#     'rpst', 'rprt', 'rpsif', 'rpsih',
+#     'rsst', 'rsrt', 'rssif', 'rssih',
+#     'acpst', 'acprt', 'acpsif', 'acpsih',
+#     'mrih',
+#     'rpvo1', 'rpvo2', 'acpvo1', 'acpvo2',
+#     'rpf1', 'rpf2', 'rpf3', 'acpf1', 'acpf2', 'acpf3', 'acpf4'
+# ]
 metrics = [
     'rpst', 'rprt', 'rpsif', 'rpsih',
     'rsst', 'rsrt', 'rssif', 'rssih',
     'acpst', 'acprt', 'acpsif', 'acpsih',
-    'msih',
-    'rpvo1', 'rpvo2', 'acpvo1', 'acpvo2',
-    'rpf1', 'rpf2', 'rpf3', 'acpf1', 'acpf2', 'acpf3', 'acpf4'
+    'mrih'
 ]
 
 class MoiraiMoE:
@@ -62,9 +68,9 @@ def load_feather_data(
     df = pd.read_feather(feather_path)
     print(f">>> 读取数据: {df.shape[0]} 个样本, {df.shape[1]} 个指标")
 
-    # 如果存在 'rpsih' 和 'acpsih'，添加 'msih'
+    # 如果存在 'rpsih' 和 'acpsih'，添加 'mrih'
     if 'rpsih' in df.columns and 'acpsih' in df.columns:
-        df['msih'] = df['rpsih'] + df['acpsih']
+        df['mrih'] = df['rpsih'] + df['acpsih']
     # 只保留需要的 `metrics` 列
     df = df[metrics]
 
@@ -101,7 +107,6 @@ def load_feather_data(
             "past": past_dict,  # 供模型使用的历史数据
             "before": before_df,  # DataFrame 格式的历史数据
             "after": after_df,  # DataFrame 格式的真实值
-            "ground_truth": after_values,  # PyTorch 格式的真实值
         })
     
     print(f'>>> Loaded {len(data)} batches of size {batch_size}')
@@ -127,9 +132,12 @@ def sample_data(preds, method='median'):
     processed_preds = FORECAST_METHODS[method](preds, axis=1)  # 在 num_samples 维度计算
 
     # 将 `batch_size` 和 `pred_len` 合并，适配 DataFrame
-    batch_size, pred_len, num_metrics = processed_preds.shape[0], processed_preds.shape[1], processed_preds.shape[2]
+    if processed_preds.ndim == 3:
+        batch_size, pred_len, num_metrics = processed_preds.shape[0], processed_preds.shape[1], processed_preds.shape[2]
+    else:
+        batch_size, pred_len = processed_preds.shape[0], processed_preds.shape[1]
+        num_metrics = 1
     processed_preds = processed_preds.reshape(batch_size * pred_len, num_metrics)
-
     # 创建 DataFrame
     df = pd.DataFrame(processed_preds, columns=metrics)
 
@@ -361,9 +369,11 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    os.makedirs(args.output_dir, exist_ok=True)
+
     data_list = [
-        # ('/home/jiaju/dataset/heating/heating_cl512_pl32.feather', 512, 32),
-        # ('/home/jiaju/dataset/heating/heating_cl512_pl64.feather', 512, 64),
+        ('/home/jiaju/dataset/heating/heating_cl512_pl32.feather', 512, 32),
+        ('/home/jiaju/dataset/heating/heating_cl512_pl64.feather', 512, 64),
         ('/home/jiaju/dataset/heating/heating_cl512_pl256.feather', 512, 256),
         ('/home/jiaju/dataset/heating/heating_cl512_pl512.feather', 512, 512)
     ]
@@ -382,7 +392,7 @@ if __name__ == "__main__":
         )
 
         model = MoiraiMoE(args)
-        output_dir = os.path.join(args.output_dir, f'{idx}')
+        output_dir = os.path.join(args.output_dir, f'pl{prediction_length}')
         os.makedirs(output_dir, exist_ok=True)
         
         final_results = {}
@@ -401,6 +411,17 @@ if __name__ == "__main__":
                 batch_size, pred_len, num_metrics = true_np.shape[0], true_np.shape[1], true_np.shape[2]
                 true_np = true_np.reshape(batch_size * pred_len, num_metrics)
                 true_df = pd.DataFrame(true_np, columns=metrics)
+
+                if index % 5 == 0:
+                    before_df = sample['before']
+                    before_np = np.array(before_df.applymap(lambda x: np.array(x, dtype=np.float32)).values.tolist())
+                    before_np = np.transpose(before_np, (0, 2, 1))
+                    batch_size, pred_len, num_metrics = before_np.shape[0], before_np.shape[1], before_np.shape[2]
+                    before_np = before_np.reshape(batch_size * pred_len, num_metrics)
+                    before_df = pd.DataFrame(before_np, columns=metrics)
+
+                    plot_metrics_to_pdf(before_df, preds_df, true_df, os.path.join(output_dir, f'{index}.pdf'))
+            
 
                 common_metrics = list(set(preds_df.columns) & set(true_df.columns))
                 
